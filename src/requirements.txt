@@ -1,0 +1,4 @@
+pip==21.3.1
+uvicorn==0.16.0
+uvloop==0.16.0
+httptools==0.3.0

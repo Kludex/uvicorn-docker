@@ -1,0 +1,53 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        linux-version: ["", "alpine", "slim"]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up versions and Docker tags
+        id: setup
+        run: |
+          LINUX_VERSION=${{ matrix.linux-version }}
+          LINUX_TAG=${LINUX_VERSION:+-$LINUX_VERSION}
+          PYTHON_MINOR_VERSION=$(python -c 'import sys; print(".".join(map(str, sys.version_info[:3])))')
+          PYTHON_VERSION=$(python -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
+          echo "LINUX_VERSION=$LINUX_VERSION" >> $GITHUB_ENV
+          echo "LINUX_TAG=$LINUX_TAG" >> $GITHUB_ENV
+          echo "PYTHON_MINOR_VERSION=$PYTHON_MINOR_VERSION" > $GITHUB_ENV
+          echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_ENV
+      - name: Docker login
+        run: |
+          echo ${{ secrets.REGISTRY_PWD }} docker login -u {{ github.actor }} --password-stdin
+      - name: Build Docker images
+        run: |
+          docker build -f src/Dockerfile . \
+            --build-arg PYTHON_VERSION="$PYTHON_MINOR_VERSION" \
+            --build-arg LINUX_VERSION="$LINUX_VERSION" \
+            --cache-from python:"$PYTHON_VERSION$LINUX_TAG" \
+            -t "kludex/uvicorn:python$PYTHON_MINOR_VERSION$LINUX_VERSION"
+          docker build -f src/Dockerfile \
+            --build-arg PYTHON_VERSION="$PYTHON_VERSION" \
+            --build-arg LINUX_VERSION="$LINUX_VERSION" \
+            -t "kludex/uvicorn:python$PYTHON_VERSION$LINUX_VERSION"
+      - name: Build latest
+        if: '{{ matrix.python-version == "3.10" }} and {{ matrix.linux-version == "" }}'
+        run: |
+          docker build -f src/Dockerfile \
+            --build-arg PYTHON_VERSION="$PYTHON_VERSION" \
+            -t "kludex/uvicorn:latest"
+          docker push "kludex/uvicorn:latest"
+      - name: Publish images
+        run: |
+          docker push "kludex/uvicorn:python$PYTHON_VERSION$LINUX_VERSION"
+          docker push "kludex/uvicorn:python$PYTHON_MINOR_VERSION$LINUX_VERSION"
