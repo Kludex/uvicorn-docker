@@ -30,7 +30,7 @@ jobs:
           echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_ENV
       - name: Docker login
         run: |
-          echo ${{ secrets.REGISTRY_PWD }} docker login -u kludex --password-stdin
+          echo ${{ secrets.REGISTRY_PWD }} | docker login -u kludex --password-stdin
       - name: Build Docker images
         run: |
           docker build -f src/Dockerfile src \
