@@ -31,19 +31,19 @@ jobs:
           echo ${{ secrets.REGISTRY_PWD }} docker login -u {{ github.actor }} --password-stdin
       - name: Build Docker images
         run: |
-          docker build -f src/Dockerfile . \
+          docker build -f src/Dockerfile src \
             --build-arg PYTHON_VERSION="$PYTHON_MINOR_VERSION" \
             --build-arg LINUX_VERSION="$LINUX_VERSION" \
             --cache-from python:"$PYTHON_VERSION$LINUX_TAG" \
             -t "kludex/uvicorn:python$PYTHON_MINOR_VERSION$LINUX_VERSION"
-          docker build -f src/Dockerfile \
+          docker build -f src/Dockerfile src \
             --build-arg PYTHON_VERSION="$PYTHON_VERSION" \
             --build-arg LINUX_VERSION="$LINUX_VERSION" \
             -t "kludex/uvicorn:python$PYTHON_VERSION$LINUX_VERSION"
       - name: Build latest
         if: ${{ matrix.python-version == '3.10' && matrix.linux-version == '' }}
         run: |
-          docker build -f src/Dockerfile \
+          docker build -f src/Dockerfile src \
             --build-arg PYTHON_VERSION="$PYTHON_VERSION" \
             -t "kludex/uvicorn:latest"
           docker push "kludex/uvicorn:latest"
