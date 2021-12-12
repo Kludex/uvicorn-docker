@@ -19,6 +19,6 @@ WORKDIR /app
 
 COPY main.py /app/main.py
 
-EXPOSE 8000
+EXPOSE ${UVICORN_PORT}
 
 CMD ["uvicorn", "main:app"]
