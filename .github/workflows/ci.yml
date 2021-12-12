@@ -24,7 +24,7 @@ jobs:
           PYTHON_VERSION=$(python -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
           echo "LINUX_VERSION=$LINUX_VERSION" >> $GITHUB_ENV
           echo "LINUX_TAG=$LINUX_TAG" >> $GITHUB_ENV
-          echo "PYTHON_MINOR_VERSION=$PYTHON_MINOR_VERSION" > $GITHUB_ENV
+          echo "PYTHON_MINOR_VERSION=$PYTHON_MINOR_VERSION" >> $GITHUB_ENV
           echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_ENV
       - name: Docker login
         run: |
@@ -35,11 +35,11 @@ jobs:
             --build-arg PYTHON_VERSION="$PYTHON_MINOR_VERSION" \
             --build-arg LINUX_VERSION="$LINUX_VERSION" \
             --cache-from python:"$PYTHON_VERSION$LINUX_TAG" \
-            -t "kludex/uvicorn:python$PYTHON_MINOR_VERSION$LINUX_VERSION"
+            -t "kludex/uvicorn:python$PYTHON_MINOR_VERSION$LINUX_TAG"
           docker build -f src/Dockerfile src \
             --build-arg PYTHON_VERSION="$PYTHON_VERSION" \
             --build-arg LINUX_VERSION="$LINUX_VERSION" \
-            -t "kludex/uvicorn:python$PYTHON_VERSION$LINUX_VERSION"
+            -t "kludex/uvicorn:python$PYTHON_VERSION$LINUX_TAG"
       - name: Build latest
         if: ${{ matrix.python-version == '3.10' && matrix.linux-version == '' }}
         run: |
@@ -50,5 +50,5 @@ jobs:
           docker push "kludex/uvicorn:latest"
       - name: Publish images
         run: |
-          docker push "kludex/uvicorn:python$PYTHON_VERSION$LINUX_VERSION"
-          docker push "kludex/uvicorn:python$PYTHON_MINOR_VERSION$LINUX_VERSION"
+          docker push "kludex/uvicorn:python$PYTHON_VERSION$LINUX_TAG"
+          docker push "kludex/uvicorn:python$PYTHON_MINOR_VERSION$LINUX_TAG"
