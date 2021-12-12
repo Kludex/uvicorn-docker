@@ -1,4 +1,4 @@
-ARG PYTHON_VERSION=3.10
+ARG PYTHON_VERSION=3.10 LINUX_VERSION=
 FROM python:${PYTHON_VERSION}${LINUX_VERSION:+-$LINUX_VERSION}
 
 LABEL maintainer="Marcelo Trylesinski <marcelotryle@gmail.com>"
